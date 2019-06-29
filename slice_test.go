@@ -78,43 +78,43 @@ func TestNext(t *testing.T) {
 func TestDeleteCount(t *testing.T) {
 	tests := []struct {
 		name  string
-		input []int
+		input []interface{}
 		count int
 		start int
 		used  int
-		want  []int
+		want  []interface{}
 	}{
 		{
 			name:  "Delete nothing",
 			start: 0,
 			count: 0,
 			used:  5,
-			input: []int{1, 2, 3, 4, 5},
-			want:  []int{1, 2, 3, 4, 5},
+			input: []interface{}{1, 2, 3, 4, 5},
+			want:  []interface{}{1, 2, 3, 4, 5},
 		},
 		{
 			name:  "Delete one",
 			start: 0,
 			count: 1,
 			used:  5,
-			input: []int{1, 2, 3, 4, 5},
-			want:  []int{0, 2, 3, 4, 5},
+			input: []interface{}{1, 2, 3, 4, 5},
+			want:  []interface{}{0, 2, 3, 4, 5},
 		},
 		{
 			name:  "Delete all",
 			start: 0,
 			count: 5,
 			used:  5,
-			input: []int{1, 2, 3, 4, 5},
-			want:  []int{0, 0, 0, 0, 0},
+			input: []interface{}{1, 2, 3, 4, 5},
+			want:  []interface{}{0, 0, 0, 0, 0},
 		},
 		{
 			name:  "Delete too many",
 			start: 0,
 			count: 100,
 			used:  5,
-			input: []int{1, 2, 3, 4, 5},
-			want:  []int{0, 0, 0, 0, 0},
+			input: []interface{}{1, 2, 3, 4, 5},
+			want:  []interface{}{0, 0, 0, 0, 0},
 		},
 	}
 	for _, tt := range tests {
@@ -134,38 +134,38 @@ func TestDeleteCount(t *testing.T) {
 func TestDeleteBounds(t *testing.T) {
 	tests := []struct {
 		name  string
-		input []int
+		input []interface{}
 		end   int
 		start int
-		want  []int
+		want  []interface{}
 	}{
 		{
 			name:  "Delete single",
 			start: 0,
 			end:   0,
-			input: []int{1, 2, 3, 4, 5},
-			want:  []int{0, 2, 3, 4, 5},
+			input: []interface{}{1, 2, 3, 4, 5},
+			want:  []interface{}{0, 2, 3, 4, 5},
 		},
 		{
 			name:  "Delete with traversal",
 			start: 0,
 			end:   1,
-			input: []int{1, 2, 3, 4, 5},
-			want:  []int{0, 0, 3, 4, 5},
+			input: []interface{}{1, 2, 3, 4, 5},
+			want:  []interface{}{0, 0, 3, 4, 5},
 		},
 		{
 			name:  "Delete all",
 			start: 0,
 			end:   4,
-			input: []int{1, 2, 3, 4, 5},
-			want:  []int{0, 0, 0, 0, 0},
+			input: []interface{}{1, 2, 3, 4, 5},
+			want:  []interface{}{0, 0, 0, 0, 0},
 		},
 		{
 			name:  "Wrap",
 			start: 3,
 			end:   1,
-			input: []int{1, 2, 3, 4, 5},
-			want:  []int{0, 0, 3, 0, 0},
+			input: []interface{}{1, 2, 3, 4, 5},
+			want:  []interface{}{0, 0, 3, 0, 0},
 		},
 	}
 	for _, tt := range tests {
@@ -189,17 +189,17 @@ func TestAppend(t *testing.T) {
 
 	tests := []struct {
 		name   string
-		input  []int
+		input  []interface{}
 		append []appendExpectationStruct
 		start  int
-		want   []int
+		want   []interface{}
 	}{
 		{
 			name:   "Append one",
 			start:  0,
 			append: []appendExpectationStruct{{val: 10, err: nil}},
-			input:  []int{1, 2, 3, 4, 5},
-			want:   []int{10, 2, 3, 4, 5},
+			input:  []interface{}{1, 2, 3, 4, 5},
+			want:   []interface{}{10, 2, 3, 4, 5},
 		},
 		{
 			name:  "Append too many",
@@ -209,8 +209,8 @@ func TestAppend(t *testing.T) {
 				{val: 5, err: nil},
 				{val: 9, err: errors.New("Index is full cannot append")},
 			},
-			input: []int{1, 2},
-			want:  []int{4, 5},
+			input: []interface{}{1, 2},
+			want:  []interface{}{4, 5},
 		},
 		{
 			name:  "Successful wrap around",
@@ -219,8 +219,8 @@ func TestAppend(t *testing.T) {
 				{val: 10, err: nil},
 				{val: 10, err: nil},
 			},
-			input: []int{1, 2, 3, 4, 5},
-			want:  []int{10, 2, 3, 4, 10},
+			input: []interface{}{1, 2, 3, 4, 5},
+			want:  []interface{}{10, 2, 3, 4, 10},
 		},
 	}
 	for _, tt := range tests {

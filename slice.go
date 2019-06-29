@@ -7,7 +7,7 @@ import (
 
 // Slice struct
 type Slice struct {
-	values []int
+	values []interface{}
 	used   int
 	start  int
 	end    int
@@ -19,11 +19,11 @@ type Slice struct {
 
 // NewSlice does
 func NewSlice(capacity int, debug bool) *Slice {
-	return &Slice{values: make([]int, capacity), debug: debug, cap: capacity}
+	return &Slice{values: make([]interface{}, capacity), debug: debug, cap: capacity}
 }
 
 // Append does
-func (s *Slice) Append(value int) error {
+func (s *Slice) Append(value interface{}) error {
 	if s.used == s.cap {
 		return errors.New("Index is full cannot append")
 	}
@@ -34,11 +34,6 @@ func (s *Slice) Append(value int) error {
 	s.values[ind] = value
 	s.used++
 	return nil
-}
-
-// Fetch does
-func (s *Slice) Fetch(index int) int {
-	return s.values[index]
 }
 
 // DeleteBounds does
