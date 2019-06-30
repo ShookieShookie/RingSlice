@@ -38,6 +38,7 @@ func (s *Slice) Append(value interface{}) error {
 
 func (s *Slice) Stats() {
 	fmt.Println("used", s.used, "start", s.start, "end", s.end)
+	fmt.Println(s.values)
 }
 
 func (s *Slice) Purge(want int64, value func(interface{}) int64) {
