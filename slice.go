@@ -65,13 +65,12 @@ func (s *Slice) validate(value func(interface{}) int64) error {
 // Purge wipes all indices that have a value determined by value function
 // to be <= want
 // TODO keep track of min and max whether we should even check
-func (s *Slice) Purge(want int64, value func(interface{}) int64) {
+func (s *Slice) Purge(want int64, value func(interface{}) int64) []interface{} {
 	ind := s.FindClosestBelowOrEqual(want, value)
 	if ind == -1 {
-		return
+		return nil
 	}
-	fmt.Println("deleting bounds", s.start, ind)
-	s.DeleteBounds(s.start, ind)
+	return s.DeleteBounds(s.start, ind)
 }
 
 // FindClosestBelowOrEqual uses a binary search to find the HIGHEST value that is <= want
