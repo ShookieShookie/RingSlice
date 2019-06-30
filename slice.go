@@ -36,7 +36,7 @@ func (s *Slice) Append(value interface{}) error {
 	return nil
 }
 
-func (s *Slice) FindClosestBelowOrEqual(want int, value func(interface{}) int) int {
+func (s *Slice) FindClosestBelowOrEqual(want int64, value func(interface{}) int64) int {
 	if s.used == 0 {
 		return -1
 	}
@@ -76,7 +76,7 @@ func (s *Slice) FindClosestBelowOrEqual(want int, value func(interface{}) int) i
 	}
 }
 
-func (s *Slice) findLatestEquivalent(m, want int, value func(interface{}) int) int {
+func (s *Slice) findLatestEquivalent(m int, want int64, value func(interface{}) int64) int {
 	new := m
 	for {
 		new = s.next(new)
@@ -90,7 +90,7 @@ func (s *Slice) findLatestEquivalent(m, want int, value func(interface{}) int) i
 }
 
 // give highest index of values below want
-func (s *Slice) determineBoundary(start, end, want int, value func(interface{}) int) int {
+func (s *Slice) determineBoundary(start, end int, want int64, value func(interface{}) int64) int {
 	if value(s.values[s.trueIndex(end, 0)]) <= want {
 		return end
 	}
