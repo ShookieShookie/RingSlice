@@ -36,9 +36,17 @@ func (s *Slice) Append(value interface{}) error {
 	return nil
 }
 
+func (s *Slice) Values(value func(interface{}) int64) []int64 {
+	v := []int64{}
+	for _, val := range s.values {
+		v = append(v, value(val))
+	}
+	return v
+}
+
 func (s *Slice) Stats() {
 	fmt.Println("used", s.used, "start", s.start, "end", s.end)
-	fmt.Println(s.values)
+
 }
 
 func (s *Slice) Purge(want int64, value func(interface{}) int64) {
