@@ -144,19 +144,17 @@ func (s *Slice) determineBoundary(start, end int, want int64, value func(interfa
 	return start
 }
 
-// DeleteBounds deletes all indices [start,end] inclusive
-func (s *Slice) DeleteBounds(start, end int) {
-	stop := s.trueIndex(end, 0)
-	for i := start; ; i = s.next(i) {
-		s.wipe(i, s.values)
-		if s.used > 0 {
-			s.used-- // TODO: could speed this up with calculation
-		}
-		if i == stop {
-			break
-		}
+func countBetween(start, end, cap int) int {
+	if end < start {
+		end = cap + end
 	}
-	s.start = s.next(stop)
+	return end - start + 1
+}
+
+// DeleteBounds deletes all indices [start,end] inclusive
+func (s *Slice) DeleteBounds(start, end int) []interface{} {
+	count := countBetween(start, end, s.cap)
+	return s.DeleteCount(count)
 }
 
 // DeleteCount deletes count of values starting at start index
@@ -167,8 +165,8 @@ func (s *Slice) DeleteCount(count int) []interface{} {
 	}
 	l := make([]interface{}, 0, count)
 	for i := 0; i < count; i++ {
-		l = append(l, s.values[s.trueIndex(i, 0)])
-		s.wipe(i, s.values)
+		l = append(l, s.values[s.trueIndex(ind, 0)])
+		s.wipe(ind, s.values)
 		ind = s.next(ind)
 	}
 	s.used -= count

@@ -3,8 +3,9 @@ package ringslice
 import (
 	"errors"
 	"fmt"
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestTrueIndex(t *testing.T) {
@@ -114,6 +115,15 @@ func TestDeleteCount(t *testing.T) {
 			wantReturn: []interface{}{1, 2, 3, 4, 5},
 		},
 		{
+			name:       "Delete many wrap",
+			start:      3,
+			count:      4,
+			used:       5,
+			input:      []interface{}{1, 2, 3, 4, 5},
+			want:       []interface{}{0, 0, 3, 0, 0},
+			wantReturn: []interface{}{4, 5, 1, 2},
+		},
+		{
 			name:       "Delete too many",
 			start:      0,
 			count:      100,
@@ -148,6 +158,7 @@ func TestDeleteBounds(t *testing.T) {
 		end       int
 		start     int
 		wantStart int
+		used      int
 		want      []interface{}
 	}{
 		{
@@ -155,6 +166,7 @@ func TestDeleteBounds(t *testing.T) {
 			start:     0,
 			end:       0,
 			wantStart: 1,
+			used:      5,
 			input:     []interface{}{1, 2, 3, 4, 5},
 			want:      []interface{}{0, 2, 3, 4, 5},
 		},
@@ -163,6 +175,7 @@ func TestDeleteBounds(t *testing.T) {
 			start:     0,
 			end:       1,
 			wantStart: 2,
+			used:      5,
 			input:     []interface{}{1, 2, 3, 4, 5},
 			want:      []interface{}{0, 0, 3, 4, 5},
 		},
@@ -171,6 +184,7 @@ func TestDeleteBounds(t *testing.T) {
 			start:     0,
 			end:       4,
 			wantStart: 0,
+			used:      5,
 			input:     []interface{}{1, 2, 3, 4, 5},
 			want:      []interface{}{0, 0, 0, 0, 0},
 		},
@@ -179,6 +193,7 @@ func TestDeleteBounds(t *testing.T) {
 			start:     3,
 			end:       1,
 			wantStart: 2,
+			used:      5,
 			input:     []interface{}{1, 2, 3, 4, 5},
 			want:      []interface{}{0, 0, 3, 0, 0},
 		},
@@ -190,6 +205,7 @@ func TestDeleteBounds(t *testing.T) {
 				start:  tt.start,
 				cap:    len(tt.input),
 				wipe:   wipeInt,
+				used:   tt.used,
 			}
 			n.DeleteBounds(tt.start, tt.end)
 			require.Equal(t, tt.want, n.values)
@@ -494,6 +510,63 @@ func TestSlice_FindClosestBelow(t *testing.T) {
 			}
 			if got := s.FindClosestBelowOrEqual(tt.args.want, tt.args.value); got != tt.want {
 				t.Errorf("Slice.FindClosestBelow() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_countBetween(t *testing.T) {
+	type args struct {
+		start int
+		end   int
+		cap   int
+	}
+	tests := []struct {
+		name string
+		args args
+		want int
+	}{
+		{
+			name: "single",
+			args: args{
+				start: 0,
+				end:   0,
+				cap:   5,
+			},
+			want: 1,
+		},
+		{
+			name: "no wrap",
+			args: args{
+				start: 0,
+				end:   4,
+				cap:   5,
+			},
+			want: 5,
+		},
+		{
+			name: "wrap double",
+			args: args{
+				start: 4,
+				end:   0,
+				cap:   5,
+			},
+			want: 2,
+		},
+		{
+			name: "wrap long",
+			args: args{
+				start: 2,
+				end:   1,
+				cap:   5,
+			},
+			want: 5,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := countBetween(tt.args.start, tt.args.end, tt.args.cap); got != tt.want {
+				t.Errorf("countBetween() = %v, want %v", got, tt.want)
 			}
 		})
 	}
