@@ -36,6 +36,15 @@ func (s *Slice) Append(value interface{}) error {
 	return nil
 }
 
+func (s *Slice) Stats() {
+	fmt.Println("used", s.used, "start", s.start, "end", s.end)
+}
+
+func (s *Slice) Purge(want int64, value func(interface{}) int64) {
+	ind := s.FindClosestBelowOrEqual(want, value)
+	s.DeleteBounds(s.start, ind)
+}
+
 func (s *Slice) FindClosestBelowOrEqual(want int64, value func(interface{}) int64) int {
 	if s.used == 0 {
 		return -1

@@ -250,8 +250,8 @@ func TestSlice_FindClosestBelow(t *testing.T) {
 		cap    int
 	}
 	type args struct {
-		want  int
-		value func(interface{}) int
+		want  int64
+		value func(interface{}) int64
 	}
 	tests := []struct {
 		name   string
@@ -262,7 +262,7 @@ func TestSlice_FindClosestBelow(t *testing.T) {
 		{
 			name: "Full midpoint find",
 			fields: fields{
-				values: []interface{}{1, 2, 3, 4, 5},
+				values: []interface{}{int64(1), int64(2), int64(3), int64(4), int64(5)},
 				used:   5,
 				start:  0,
 				end:    4,
@@ -271,14 +271,14 @@ func TestSlice_FindClosestBelow(t *testing.T) {
 			},
 			args: args{
 				want:  3,
-				value: func(i interface{}) int { return i.(int) },
+				value: func(i interface{}) int64 { return i.(int64) },
 			},
 			want: 2,
 		},
 		{
 			name: "All equal and below",
 			fields: fields{
-				values: []interface{}{1, 1, 1, 1, 1},
+				values: []interface{}{int64(1), int64(1), int64(1), int64(1), int64(1)},
 				used:   5,
 				start:  0,
 				end:    4,
@@ -287,14 +287,14 @@ func TestSlice_FindClosestBelow(t *testing.T) {
 			},
 			args: args{
 				want:  3,
-				value: func(i interface{}) int { return i.(int) },
+				value: func(i interface{}) int64 { return i.(int64) },
 			},
 			want: 4,
 		},
 		{
 			name: "All equal exact",
 			fields: fields{
-				values: []interface{}{3, 3, 3, 3, 3},
+				values: []interface{}{int64(3), int64(3), int64(3), int64(3), int64(3)},
 				used:   5,
 				start:  0,
 				end:    4,
@@ -303,14 +303,14 @@ func TestSlice_FindClosestBelow(t *testing.T) {
 			},
 			args: args{
 				want:  3,
-				value: func(i interface{}) int { return i.(int) },
+				value: func(i interface{}) int64 { return i.(int64) },
 			},
 			want: 4,
 		},
 		{
 			name: "All equal and above",
 			fields: fields{
-				values: []interface{}{5, 5, 5, 5, 5},
+				values: []interface{}{int64(5), int64(5), int64(5), int64(5), int64(5)},
 				used:   5,
 				start:  0,
 				end:    4,
@@ -319,14 +319,14 @@ func TestSlice_FindClosestBelow(t *testing.T) {
 			},
 			args: args{
 				want:  3,
-				value: func(i interface{}) int { return i.(int) },
+				value: func(i interface{}) int64 { return i.(int64) },
 			},
 			want: -1,
 		},
 		{
 			name: "All equal and above midpoint",
 			fields: fields{
-				values: []interface{}{1, 2, 3, 3, 3},
+				values: []interface{}{int64(1), int64(2), int64(3), int64(3), int64(3)},
 				used:   5,
 				start:  0,
 				end:    4,
@@ -335,7 +335,7 @@ func TestSlice_FindClosestBelow(t *testing.T) {
 			},
 			args: args{
 				want:  3,
-				value: func(i interface{}) int { return i.(int) },
+				value: func(i interface{}) int64 { return i.(int64) },
 			},
 			want: 4,
 		},
@@ -348,14 +348,14 @@ func TestSlice_FindClosestBelow(t *testing.T) {
 			},
 			args: args{
 				want:  3,
-				value: func(i interface{}) int { return i.(int) },
+				value: func(i interface{}) int64 { return i.(int64) },
 			},
 			want: -1,
 		},
 		{
 			name: "single below",
 			fields: fields{
-				values: []interface{}{1},
+				values: []interface{}{int64(1)},
 				used:   1,
 				start:  0,
 				end:    0,
@@ -364,14 +364,14 @@ func TestSlice_FindClosestBelow(t *testing.T) {
 			},
 			args: args{
 				want:  2,
-				value: func(i interface{}) int { return i.(int) },
+				value: func(i interface{}) int64 { return i.(int64) },
 			},
 			want: 0,
 		},
 		{
 			name: "single above",
 			fields: fields{
-				values: []interface{}{10},
+				values: []interface{}{int64(10)},
 				used:   1,
 				start:  0,
 				end:    0,
@@ -380,14 +380,14 @@ func TestSlice_FindClosestBelow(t *testing.T) {
 			},
 			args: args{
 				want:  2,
-				value: func(i interface{}) int { return i.(int) },
+				value: func(i interface{}) int64 { return i.(int64) },
 			},
 			want: -1,
 		},
 		{
 			name: "two node boundary both above",
 			fields: fields{
-				values: []interface{}{10, 11},
+				values: []interface{}{int64(10), int64(11)},
 				used:   2,
 				start:  0,
 				end:    1,
@@ -396,14 +396,14 @@ func TestSlice_FindClosestBelow(t *testing.T) {
 			},
 			args: args{
 				want:  5,
-				value: func(i interface{}) int { return i.(int) },
+				value: func(i interface{}) int64 { return i.(int64) },
 			},
 			want: -1,
 		},
 		{
 			name: "two node boundary across boundary",
 			fields: fields{
-				values: []interface{}{3, 5},
+				values: []interface{}{int64(3), int64(5)},
 				used:   2,
 				start:  0,
 				end:    1,
@@ -412,14 +412,14 @@ func TestSlice_FindClosestBelow(t *testing.T) {
 			},
 			args: args{
 				want:  4,
-				value: func(i interface{}) int { return i.(int) },
+				value: func(i interface{}) int64 { return i.(int64) },
 			},
 			want: 0,
 		},
 		{
 			name: "two node boundary both below",
 			fields: fields{
-				values: []interface{}{1, 2},
+				values: []interface{}{int64(1), int64(2)},
 				used:   2,
 				start:  0,
 				end:    1,
@@ -428,14 +428,14 @@ func TestSlice_FindClosestBelow(t *testing.T) {
 			},
 			args: args{
 				want:  5,
-				value: func(i interface{}) int { return i.(int) },
+				value: func(i interface{}) int64 { return i.(int64) },
 			},
 			want: 1,
 		},
 		{
 			name: "two node backwards boundary",
 			fields: fields{
-				values: []interface{}{10, 1},
+				values: []interface{}{int64(10), int64(1)},
 				used:   2,
 				start:  1,
 				end:    0,
@@ -444,7 +444,7 @@ func TestSlice_FindClosestBelow(t *testing.T) {
 			},
 			args: args{
 				want:  5,
-				value: func(i interface{}) int { return i.(int) },
+				value: func(i interface{}) int64 { return i.(int64) },
 			},
 			want: 1,
 		},
