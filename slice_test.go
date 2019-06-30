@@ -2,6 +2,7 @@ package ringslice
 
 import (
 	"errors"
+	"fmt"
 	"github.com/stretchr/testify/require"
 	"testing"
 )
@@ -235,6 +236,233 @@ func TestAppend(t *testing.T) {
 				require.Equal(t, ex.err, err)
 			}
 			require.Equal(t, tt.want, n.values)
+		})
+	}
+}
+
+func TestSlice_FindClosestBelow(t *testing.T) {
+	type fields struct {
+		values []interface{}
+		used   int
+		start  int
+		end    int
+		debug  bool
+		cap    int
+	}
+	type args struct {
+		want  int
+		value func(interface{}) int
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+		want   int
+	}{
+		{
+			name: "Full midpoint find",
+			fields: fields{
+				values: []interface{}{1, 2, 3, 4, 5},
+				used:   5,
+				start:  0,
+				end:    4,
+				debug:  false,
+				cap:    5,
+			},
+			args: args{
+				want:  3,
+				value: func(i interface{}) int { return i.(int) },
+			},
+			want: 2,
+		},
+		{
+			name: "All equal and below",
+			fields: fields{
+				values: []interface{}{1, 1, 1, 1, 1},
+				used:   5,
+				start:  0,
+				end:    4,
+				debug:  false,
+				cap:    5,
+			},
+			args: args{
+				want:  3,
+				value: func(i interface{}) int { return i.(int) },
+			},
+			want: 4,
+		},
+		{
+			name: "All equal exact",
+			fields: fields{
+				values: []interface{}{3, 3, 3, 3, 3},
+				used:   5,
+				start:  0,
+				end:    4,
+				debug:  false,
+				cap:    5,
+			},
+			args: args{
+				want:  3,
+				value: func(i interface{}) int { return i.(int) },
+			},
+			want: 4,
+		},
+		{
+			name: "All equal and above",
+			fields: fields{
+				values: []interface{}{5, 5, 5, 5, 5},
+				used:   5,
+				start:  0,
+				end:    4,
+				debug:  false,
+				cap:    5,
+			},
+			args: args{
+				want:  3,
+				value: func(i interface{}) int { return i.(int) },
+			},
+			want: -1,
+		},
+		{
+			name: "All equal and above midpoint",
+			fields: fields{
+				values: []interface{}{1, 2, 3, 3, 3},
+				used:   5,
+				start:  0,
+				end:    4,
+				debug:  false,
+				cap:    5,
+			},
+			args: args{
+				want:  3,
+				value: func(i interface{}) int { return i.(int) },
+			},
+			want: 4,
+		},
+		{
+			name: "empty",
+			fields: fields{
+				used:  0,
+				start: 0,
+				end:   0,
+			},
+			args: args{
+				want:  3,
+				value: func(i interface{}) int { return i.(int) },
+			},
+			want: -1,
+		},
+		{
+			name: "single below",
+			fields: fields{
+				values: []interface{}{1},
+				used:   1,
+				start:  0,
+				end:    0,
+				debug:  false,
+				cap:    1,
+			},
+			args: args{
+				want:  2,
+				value: func(i interface{}) int { return i.(int) },
+			},
+			want: 0,
+		},
+		{
+			name: "single above",
+			fields: fields{
+				values: []interface{}{10},
+				used:   1,
+				start:  0,
+				end:    0,
+				debug:  false,
+				cap:    1,
+			},
+			args: args{
+				want:  2,
+				value: func(i interface{}) int { return i.(int) },
+			},
+			want: -1,
+		},
+		{
+			name: "two node boundary both above",
+			fields: fields{
+				values: []interface{}{10, 11},
+				used:   2,
+				start:  0,
+				end:    1,
+				debug:  false,
+				cap:    2,
+			},
+			args: args{
+				want:  5,
+				value: func(i interface{}) int { return i.(int) },
+			},
+			want: -1,
+		},
+		{
+			name: "two node boundary across boundary",
+			fields: fields{
+				values: []interface{}{3, 5},
+				used:   2,
+				start:  0,
+				end:    1,
+				debug:  false,
+				cap:    2,
+			},
+			args: args{
+				want:  4,
+				value: func(i interface{}) int { return i.(int) },
+			},
+			want: 0,
+		},
+		{
+			name: "two node boundary both below",
+			fields: fields{
+				values: []interface{}{1, 2},
+				used:   2,
+				start:  0,
+				end:    1,
+				debug:  false,
+				cap:    2,
+			},
+			args: args{
+				want:  5,
+				value: func(i interface{}) int { return i.(int) },
+			},
+			want: 1,
+		},
+		{
+			name: "two node backwards boundary",
+			fields: fields{
+				values: []interface{}{10, 1},
+				used:   2,
+				start:  1,
+				end:    0,
+				debug:  false,
+				cap:    2,
+			},
+			args: args{
+				want:  5,
+				value: func(i interface{}) int { return i.(int) },
+			},
+			want: 1,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			fmt.Println(tt.name)
+			s := &Slice{
+				values: tt.fields.values,
+				used:   tt.fields.used,
+				start:  tt.fields.start,
+				end:    tt.fields.end,
+				debug:  tt.fields.debug,
+				cap:    tt.fields.cap,
+			}
+			if got := s.FindClosestBelowOrEqual(tt.args.want, tt.args.value); got != tt.want {
+				t.Errorf("Slice.FindClosestBelow() = %v, want %v", got, tt.want)
+			}
 		})
 	}
 }
