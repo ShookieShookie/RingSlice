@@ -42,6 +42,9 @@ func (s *Slice) Stats() {
 
 func (s *Slice) Purge(want int64, value func(interface{}) int64) {
 	ind := s.FindClosestBelowOrEqual(want, value)
+	if ind == -1 {
+		return
+	}
 	fmt.Println("deleting bounds", s.start, ind)
 	s.DeleteBounds(s.start, ind)
 }
