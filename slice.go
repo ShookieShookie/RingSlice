@@ -114,7 +114,7 @@ func (s *Slice) determineBoundary(start, end int, want int64, value func(interfa
 func (s *Slice) DeleteBounds(start, end int) {
 	stop := s.trueIndex(end, 0)
 	for i := start; ; i = s.next(i) {
-		s.values[i] = 0
+		// s.values[i] = 0
 		s.used-- // TODO: could speed this up with calculation
 		if i == stop {
 			break
@@ -130,7 +130,7 @@ func (s *Slice) DeleteCount(count int) {
 		count = s.used // save us some time
 	}
 	for i := 0; i < count; i++ {
-		s.values[ind] = 0
+		// s.values[ind] = 0
 		ind = s.next(ind)
 	}
 	s.used -= count
