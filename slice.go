@@ -74,9 +74,10 @@ func (s *Slice) FindClosestBelowOrEqual(want int64, value func(interface{}) int6
 		return start
 	}
 	count := 0
-	for m := s.trueIndex((start+falseMax)/2, 0); ; {
+	for m := (start + falseMax) / 2; ; {
 		count++
-		if count > 10 {
+		fmt.Println(start, end, m)
+		if count > 5 {
 			panic(count)
 		}
 		cur := value(s.values[s.trueIndex(m, 0)])
@@ -99,7 +100,7 @@ func (s *Slice) FindClosestBelowOrEqual(want int64, value func(interface{}) int6
 			end = m
 		}
 		// set the next check index to be midpoint between changed start and end
-		m = s.trueIndex((start+end)/2, 0)
+		m = (start + end) / 2
 	}
 }
 

@@ -459,6 +459,22 @@ func TestSlice_FindClosestBelow(t *testing.T) {
 			},
 			want: 1,
 		},
+		{
+			name: "flesh out bug",
+			fields: fields{
+				values: []interface{}{int64(1561882874), int64(1561882875), int64(1561882876), int64(0), int64(0), int64(0), int64(0), int64(0), int64(1561882872), int64(1561882873)},
+				used:   5,
+				start:  8,
+				end:    2,
+				debug:  false,
+				cap:    10,
+			},
+			args: args{
+				want:  1561882872,
+				value: func(i interface{}) int64 { return i.(int64) },
+			},
+			want: 8,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
