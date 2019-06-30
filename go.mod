@@ -1,4 +1,4 @@
-module github.com/ShookieShookie/RingSlice
+module github.com/ShookieShookie/ringslice
 
 go 1.12
 
