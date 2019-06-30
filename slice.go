@@ -42,6 +42,7 @@ func (s *Slice) Stats() {
 
 func (s *Slice) Purge(want int64, value func(interface{}) int64) {
 	ind := s.FindClosestBelowOrEqual(want, value)
+	fmt.Println("deleting bounds", s.start, ind)
 	s.DeleteBounds(s.start, ind)
 }
 
@@ -60,7 +61,12 @@ func (s *Slice) FindClosestBelowOrEqual(want int64, value func(interface{}) int6
 		}
 		return start
 	}
+	count := 0
 	for m := s.trueIndex((start+falseMax)/2, 0); ; {
+		count++
+		if count > 10 {
+			panic(count)
+		}
 		cur := value(s.values[s.trueIndex(m, 0)])
 		if cur == want {
 			// if we find the exact value, walk to latest index with this value
@@ -115,7 +121,9 @@ func (s *Slice) DeleteBounds(start, end int) {
 	stop := s.trueIndex(end, 0)
 	for i := start; ; i = s.next(i) {
 		// s.values[i] = 0
-		s.used-- // TODO: could speed this up with calculation
+		if s.used > 0 {
+			s.used-- // TODO: could speed this up with calculation
+		}
 		if i == stop {
 			break
 		}
