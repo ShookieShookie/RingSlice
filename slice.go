@@ -46,7 +46,6 @@ func (s *Slice) Values(value func(interface{}) int64) []int64 {
 
 func (s *Slice) Stats() {
 	fmt.Println("used", s.used, "start", s.start, "end", s.end)
-
 }
 
 func (s *Slice) Purge(want int64, value func(interface{}) int64) {
@@ -140,7 +139,7 @@ func (s *Slice) DeleteBounds(start, end int) {
 			break
 		}
 	}
-	s.start = stop
+	s.start = s.next(stop)
 }
 
 // DeleteCount does
