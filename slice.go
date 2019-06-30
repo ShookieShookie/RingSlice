@@ -160,17 +160,20 @@ func (s *Slice) DeleteBounds(start, end int) {
 }
 
 // DeleteCount deletes count of values starting at start index
-func (s *Slice) DeleteCount(count int) {
+func (s *Slice) DeleteCount(count int) []interface{} {
 	ind := s.start
 	if count > s.used {
 		count = s.used // save us some time
 	}
+	l := make([]interface{}, 0, count)
 	for i := 0; i < count; i++ {
+		l = append(l, s.values[s.trueIndex(i, 0)])
 		s.wipe(i, s.values)
 		ind = s.next(ind)
 	}
 	s.used -= count
 	s.start = ind
+	return l
 }
 
 // safely iterate loop clockwise

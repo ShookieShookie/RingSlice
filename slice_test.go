@@ -78,44 +78,49 @@ func TestNext(t *testing.T) {
 
 func TestDeleteCount(t *testing.T) {
 	tests := []struct {
-		name  string
-		input []interface{}
-		count int
-		start int
-		used  int
-		want  []interface{}
+		name       string
+		input      []interface{}
+		count      int
+		start      int
+		used       int
+		want       []interface{}
+		wantReturn []interface{}
 	}{
 		{
-			name:  "Delete nothing",
-			start: 0,
-			count: 0,
-			used:  5,
-			input: []interface{}{1, 2, 3, 4, 5},
-			want:  []interface{}{1, 2, 3, 4, 5},
+			name:       "Delete nothing",
+			start:      0,
+			count:      0,
+			used:       5,
+			input:      []interface{}{1, 2, 3, 4, 5},
+			want:       []interface{}{1, 2, 3, 4, 5},
+			wantReturn: []interface{}{},
 		},
 		{
-			name:  "Delete one",
-			start: 0,
-			count: 1,
-			used:  5,
-			input: []interface{}{1, 2, 3, 4, 5},
-			want:  []interface{}{0, 2, 3, 4, 5},
+			name:       "Delete one",
+			start:      0,
+			count:      1,
+			used:       5,
+			input:      []interface{}{1, 2, 3, 4, 5},
+			want:       []interface{}{0, 2, 3, 4, 5},
+			wantReturn: []interface{}{1},
 		},
 		{
-			name:  "Delete all",
-			start: 0,
-			count: 5,
-			used:  5,
-			input: []interface{}{1, 2, 3, 4, 5},
-			want:  []interface{}{0, 0, 0, 0, 0},
+			name:       "Delete all",
+			start:      0,
+			count:      5,
+			used:       5,
+			input:      []interface{}{1, 2, 3, 4, 5},
+			want:       []interface{}{0, 0, 0, 0, 0},
+			wantReturn: []interface{}{1, 2, 3, 4, 5},
 		},
 		{
-			name:  "Delete too many",
-			start: 0,
-			count: 100,
-			used:  5,
-			input: []interface{}{1, 2, 3, 4, 5},
-			want:  []interface{}{0, 0, 0, 0, 0},
+			name:       "Delete too many",
+			start:      0,
+			count:      100,
+			used:       5,
+			input:      []interface{}{1, 2, 3, 4, 5},
+			want:       []interface{}{0, 0, 0, 0, 0},
+			wantReturn: []interface{}{1, 2, 3, 4, 5},
 		},
 	}
 	for _, tt := range tests {
@@ -127,8 +132,9 @@ func TestDeleteCount(t *testing.T) {
 				used:   tt.used,
 				wipe:   wipeInt,
 			}
-			n.DeleteCount(tt.count)
+			got := n.DeleteCount(tt.count)
 			require.Equal(t, tt.want, n.values)
+			require.Equal(t, tt.wantReturn, got)
 		})
 	}
 }
@@ -483,8 +489,6 @@ func TestSlice_FindClosestBelow(t *testing.T) {
 				values: tt.fields.values,
 				used:   tt.fields.used,
 				start:  tt.fields.start,
-				end:    tt.fields.end,
-				debug:  tt.fields.debug,
 				cap:    tt.fields.cap,
 				wipe:   wipeInt,
 			}
