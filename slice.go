@@ -10,33 +10,28 @@ type Slice struct {
 	values []interface{}
 	used   int
 	start  int
-	end    int
-	debug  bool
 	cap    int
 	wipe   func(int, []interface{})
 }
 
-// TODO provide a clear function
-
 // NewSlice does
 func NewSlice(capacity int, debug bool, wipe func(int, []interface{})) *Slice {
-	return &Slice{values: make([]interface{}, capacity), debug: debug, cap: capacity, wipe: wipe}
+	return &Slice{values: make([]interface{}, capacity), cap: capacity, wipe: wipe}
 }
 
-// Append does
+// Append adds an entry if possible, returns error if full
 func (s *Slice) Append(value interface{}) error {
 	if s.used == s.cap {
 		return errors.New("Index is full cannot append")
 	}
 	ind := s.trueIndex(s.start, s.used) // next index is same as num written
-	if s.debug {
-		fmt.Println("ind to write to ", ind)
-	}
 	s.values[ind] = value
 	s.used++
 	return nil
 }
 
+// Values provides a set of values for debugging purposes by taking ring
+// and applying valuation function to each entry
 func (s *Slice) Values(value func(interface{}) int64) []int64 {
 	v := []int64{}
 	for _, val := range s.values {
@@ -45,10 +40,31 @@ func (s *Slice) Values(value func(interface{}) int64) []int64 {
 	return v
 }
 
-func (s *Slice) Stats() {
-	fmt.Println("used", s.used, "start", s.start, "end", s.end)
+// Stats prints information for debugging the slice
+func (s *Slice) Stats(value func(interface{}) int64) {
+	fmt.Println("used", s.used, "start", s.start, "valid", s.validate(value))
 }
 
+func (s *Slice) validate(value func(interface{}) int64) error {
+	if s.start > (s.cap - 1) {
+		return errors.New("illegal start")
+	}
+	if s.used <= 1 {
+		return nil
+	}
+	var last int64
+	for i := s.start; i < s.start+s.used-1; i++ {
+		next := value(s.values[s.trueIndex(i, 0)])
+		if next < last {
+			return errors.New("values out of order")
+		}
+	}
+	return nil
+}
+
+// Purge wipes all indices that have a value determined by value function
+// to be <= want
+// TODO keep track of min and max whether we should even check
 func (s *Slice) Purge(want int64, value func(interface{}) int64) {
 	ind := s.FindClosestBelowOrEqual(want, value)
 	if ind == -1 {
@@ -58,6 +74,9 @@ func (s *Slice) Purge(want int64, value func(interface{}) int64) {
 	s.DeleteBounds(s.start, ind)
 }
 
+// FindClosestBelowOrEqual uses a binary search to find the HIGHEST value that is <= want
+// if nothing is <= value, return -1. Accounts for array wrapping around by determining the bounds
+// of the array if it were laid out contiguously
 func (s *Slice) FindClosestBelowOrEqual(want int64, value func(interface{}) int64) int {
 	if s.used == 0 {
 		return -1
@@ -73,13 +92,8 @@ func (s *Slice) FindClosestBelowOrEqual(want int64, value func(interface{}) int6
 		}
 		return start
 	}
-	count := 0
+	// start at midpoint, always lookup with index value % length of array
 	for m := (start + falseMax) / 2; ; {
-		count++
-		fmt.Println(start, end, m)
-		if count > 5 {
-			panic(count)
-		}
 		cur := value(s.values[s.trueIndex(m, 0)])
 		if cur == want {
 			// if we find the exact value, walk to latest index with this value
@@ -104,12 +118,13 @@ func (s *Slice) FindClosestBelowOrEqual(want int64, value func(interface{}) int6
 	}
 }
 
+// findLatestEquivalent walks clockwise in the array until the value changes, finding the highest
+// value <= want linearly. TODO: Could be optimized (val-count map) but intended case does not have any/ few equals.
 func (s *Slice) findLatestEquivalent(m int, want int64, value func(interface{}) int64) int {
-	new := m
-	for {
+	for new := m; ; {
 		new = s.next(new)
 		if new == m {
-			return s.end // we've done a full loop
+			return s.trueIndex(s.start+s.used-1, 0) // we've iterated back to where we started, all values equal
 		}
 		if value(s.values[s.trueIndex(new, 0)]) != want {
 			return s.prev(new)
@@ -117,7 +132,8 @@ func (s *Slice) findLatestEquivalent(m int, want int64, value func(interface{}) 
 	}
 }
 
-// give highest index of values below want
+// determineBoundary provides logic for case when pointers are 1 away from each other
+// happens when 1) all values are > 2) all values are < 3) there is a set below and a set above want
 func (s *Slice) determineBoundary(start, end int, want int64, value func(interface{}) int64) int {
 	if value(s.values[s.trueIndex(end, 0)]) <= want {
 		return end
@@ -126,10 +142,9 @@ func (s *Slice) determineBoundary(start, end int, want int64, value func(interfa
 		return -1
 	}
 	return start
-
 }
 
-// DeleteBounds does
+// DeleteBounds deletes all indices [start,end] inclusive
 func (s *Slice) DeleteBounds(start, end int) {
 	stop := s.trueIndex(end, 0)
 	for i := start; ; i = s.next(i) {
@@ -144,7 +159,7 @@ func (s *Slice) DeleteBounds(start, end int) {
 	s.start = s.next(stop)
 }
 
-// DeleteCount does
+// DeleteCount deletes count of values starting at start index
 func (s *Slice) DeleteCount(count int) {
 	ind := s.start
 	if count > s.used {
@@ -158,12 +173,15 @@ func (s *Slice) DeleteCount(count int) {
 	s.start = ind
 }
 
+// safely iterate loop clockwise
 func (s *Slice) next(cur int) int {
 	if cur == s.cap-1 {
 		return 0
 	}
 	return cur + 1
 }
+
+// safely iterate loop counterclockwise
 func (s *Slice) prev(cur int) int {
 	if cur == 0 {
 		return s.cap - 1

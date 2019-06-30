@@ -335,7 +335,7 @@ func TestSlice_FindClosestBelow(t *testing.T) {
 			want: -1,
 		},
 		{
-			name: "All equal and above midpoint",
+			name: "Equal and above midpoint",
 			fields: fields{
 				values: []interface{}{int64(1), int64(2), int64(3), int64(3), int64(3)},
 				used:   5,
@@ -460,7 +460,7 @@ func TestSlice_FindClosestBelow(t *testing.T) {
 			want: 1,
 		},
 		{
-			name: "flesh out bug",
+			name: "wrap around requiring multiple midpoint calculation",
 			fields: fields{
 				values: []interface{}{int64(1561882874), int64(1561882875), int64(1561882876), int64(0), int64(0), int64(0), int64(0), int64(0), int64(1561882872), int64(1561882873)},
 				used:   5,
