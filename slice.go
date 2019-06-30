@@ -13,13 +13,14 @@ type Slice struct {
 	end    int
 	debug  bool
 	cap    int
+	wipe   func(int, []interface{})
 }
 
 // TODO provide a clear function
 
 // NewSlice does
-func NewSlice(capacity int, debug bool) *Slice {
-	return &Slice{values: make([]interface{}, capacity), debug: debug, cap: capacity}
+func NewSlice(capacity int, debug bool, wipe func(int, []interface{})) *Slice {
+	return &Slice{values: make([]interface{}, capacity), debug: debug, cap: capacity, wipe: wipe}
 }
 
 // Append does
@@ -131,7 +132,7 @@ func (s *Slice) determineBoundary(start, end int, want int64, value func(interfa
 func (s *Slice) DeleteBounds(start, end int) {
 	stop := s.trueIndex(end, 0)
 	for i := start; ; i = s.next(i) {
-		// s.values[i] = 0
+		s.wipe(i, s.values)
 		if s.used > 0 {
 			s.used-- // TODO: could speed this up with calculation
 		}
@@ -149,7 +150,7 @@ func (s *Slice) DeleteCount(count int) {
 		count = s.used // save us some time
 	}
 	for i := 0; i < count; i++ {
-		// s.values[ind] = 0
+		s.wipe(i, s.values)
 		ind = s.next(ind)
 	}
 	s.used -= count

@@ -40,7 +40,7 @@ func TestTrueIndex(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := NewSlice(tt.capacity, false)
+			s := NewSlice(tt.capacity, false, wipeInt)
 			ind := s.trueIndex(tt.start, tt.distance)
 			require.Equal(t, tt.want, ind)
 		})
@@ -69,7 +69,7 @@ func TestNext(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			n := NewSlice(tt.cap, false)
+			n := NewSlice(tt.cap, false, wipeInt)
 			got := n.next(tt.ind)
 			require.Equal(t, tt.want, got)
 		})
@@ -125,48 +125,56 @@ func TestDeleteCount(t *testing.T) {
 				start:  tt.start,
 				cap:    len(tt.input),
 				used:   tt.used,
+				wipe:   wipeInt,
 			}
 			n.DeleteCount(tt.count)
 			require.Equal(t, tt.want, n.values)
 		})
 	}
 }
-
+func wipeInt(i int, l []interface{}) {
+	l[i] = 0
+}
 func TestDeleteBounds(t *testing.T) {
 	tests := []struct {
-		name  string
-		input []interface{}
-		end   int
-		start int
-		want  []interface{}
+		name      string
+		input     []interface{}
+		end       int
+		start     int
+		wantStart int
+		want      []interface{}
 	}{
 		{
-			name:  "Delete single",
-			start: 0,
-			end:   0,
-			input: []interface{}{1, 2, 3, 4, 5},
-			want:  []interface{}{0, 2, 3, 4, 5},
+			name:      "Delete single",
+			start:     0,
+			end:       0,
+			wantStart: 1,
+			input:     []interface{}{1, 2, 3, 4, 5},
+			want:      []interface{}{0, 2, 3, 4, 5},
 		},
 		{
-			name:  "Delete with traversal",
-			start: 0,
-			end:   1,
-			input: []interface{}{1, 2, 3, 4, 5},
-			want:  []interface{}{0, 0, 3, 4, 5},
+			name:      "Delete with traversal",
+			start:     0,
+			end:       1,
+			wantStart: 2,
+			input:     []interface{}{1, 2, 3, 4, 5},
+			want:      []interface{}{0, 0, 3, 4, 5},
 		},
 		{
-			name:  "Delete all",
-			start: 0,
-			end:   4,
-			input: []interface{}{1, 2, 3, 4, 5},
-			want:  []interface{}{0, 0, 0, 0, 0},
+			name:      "Delete all",
+			start:     0,
+			end:       4,
+			wantStart: 0,
+			input:     []interface{}{1, 2, 3, 4, 5},
+			want:      []interface{}{0, 0, 0, 0, 0},
 		},
 		{
-			name:  "Wrap",
-			start: 3,
-			end:   1,
-			input: []interface{}{1, 2, 3, 4, 5},
-			want:  []interface{}{0, 0, 3, 0, 0},
+			name:      "Wrap",
+			start:     3,
+			end:       1,
+			wantStart: 2,
+			input:     []interface{}{1, 2, 3, 4, 5},
+			want:      []interface{}{0, 0, 3, 0, 0},
 		},
 	}
 	for _, tt := range tests {
@@ -175,9 +183,11 @@ func TestDeleteBounds(t *testing.T) {
 				values: tt.input,
 				start:  tt.start,
 				cap:    len(tt.input),
+				wipe:   wipeInt,
 			}
 			n.DeleteBounds(tt.start, tt.end)
 			require.Equal(t, tt.want, n.values)
+			require.Equal(t, tt.wantStart, n.start)
 		})
 	}
 }
@@ -230,6 +240,7 @@ func TestAppend(t *testing.T) {
 				values: tt.input,
 				start:  tt.start,
 				cap:    len(tt.input),
+				wipe:   wipeInt,
 			}
 			for _, ex := range tt.append {
 				err := n.Append(ex.val)
@@ -459,6 +470,7 @@ func TestSlice_FindClosestBelow(t *testing.T) {
 				end:    tt.fields.end,
 				debug:  tt.fields.debug,
 				cap:    tt.fields.cap,
+				wipe:   wipeInt,
 			}
 			if got := s.FindClosestBelowOrEqual(tt.args.want, tt.args.value); got != tt.want {
 				t.Errorf("Slice.FindClosestBelow() = %v, want %v", got, tt.want)
